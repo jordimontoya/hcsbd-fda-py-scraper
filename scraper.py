@@ -82,14 +82,14 @@ def run_scraper():
 
     # HCSBD - Builds and writes excel's header section
     worksheetHCSBD.merge_range('A1:D1', 'Data entries', merge_format)
-    worksheetHCSBD.merge_range('E1:K1', 'Milestone submission', merge_format_milestone)
-    worksheetHCSBD.merge_range('L1:S1', 'Request for priority status', merge_format_priority)
-    worksheetHCSBD.merge_range('T1:AJ1', 'Screening 1', merge_format_screening)
-    worksheetHCSBD.merge_range('AK1:CD1', 'Review 1', merge_format_review)
-    worksheetHCSBD.merge_range('CE1:CT1', 'Screening 2', merge_format_screening)
-    worksheetHCSBD.merge_range('CU1:EM1', 'Review 2', merge_format_review)
-    worksheetHCSBD.merge_range('EN1:FD1', 'Screening 3', merge_format_screening)
-    worksheetHCSBD.merge_range('FE1:GW1', 'Review 3', merge_format_review)
+    worksheetHCSBD.merge_range('E1:M1', 'Milestone submission', merge_format_milestone)
+    worksheetHCSBD.merge_range('N1:V1', 'Request for priority status', merge_format_priority)
+    worksheetHCSBD.merge_range('W1:AM1', 'Screening 1', merge_format_screening)
+    worksheetHCSBD.merge_range('AN1:CH1', 'Review 1', merge_format_review)
+    worksheetHCSBD.merge_range('CI1:CY1', 'Screening 2', merge_format_screening)
+    worksheetHCSBD.merge_range('CZ1:EM1', 'Review 2', merge_format_review)
+    worksheetHCSBD.merge_range('ET1:FK1', 'Screening 3', merge_format_screening)
+    worksheetHCSBD.merge_range('FL1:HF1', 'Review 3', merge_format_review)
 
     # HCSBD - Builds and writes excel's subheader
     header_arr = cf.API_REST_KEYS_LIST + ["id"] + listHeader(cf.HCSBD_MILESTONE_SUBMISSION) + listHeader(cf.HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS) + listHeader(cf.HCSBD_MILESTONE_SCREENING) + listHeader(cf.HCSBD_MILESTONE_REVIEW) + listHeader(cf.HCSBD_MILESTONE_SCREENING) + listHeader(cf.HCSBD_MILESTONE_REVIEW) + listHeader(cf.HCSBD_MILESTONE_SCREENING) + listHeader(cf.HCSBD_MILESTONE_REVIEW)

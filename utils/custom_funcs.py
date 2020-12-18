@@ -3,12 +3,13 @@ import datetime
 
 OUTPUT_FILE = "HCSBD-FDA-data-import.xlsx"
 OUTPUT_FILE_TMP = "HCSBD-FDA-data-import-tmp.xlsx"
+
 BASE_URL_HCSBD_1 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID="
 BASE_URL_HCSBD_2 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailTwo.php?lang=en&linkID="
 BASE_URL_HCSBD_3 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-medical-device-detailOne.php?lang=en&linkID="
 API_REST_HCSBD_LIST = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?term=&pType=sbd&lang=en"
 API_REST_HCSBD_DETAIL = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?linkID={}&pType=sbd&lang=en"
-#to not take items : ["Control Number",] #duplicated value: https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00390
+
 API_REST_KEYS_LIST = ["brand_name","med_ingredient","manufacturer"]
 
 HCSBD_MILESTONE_SUBMISSION = [
@@ -19,7 +20,8 @@ HCSBD_MILESTONE_SUBMISSION = [
     "Acceptance Letter issued",
     "Rolling New Drug Submission (NDS) filed",
     "Administrative information, Cross-Reference to Rolling NDS",
-    "Approval issued by Director","Refusal"
+    "Approval issued by Director",
+    "Refusal"
     ]
 
 HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS = [
@@ -33,6 +35,7 @@ HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS = [
     "Acceptance Letter",
     "Submission filed"
     ]
+
 HCSBD_MILESTONE_SCREENING = [
     "Pre-submission meeting",
     "Quality",
@@ -52,6 +55,7 @@ HCSBD_MILESTONE_SCREENING = [
     "Submission filed",
     "NOC|Notice of Compliance"
     ]
+
 HCSBD_MILESTONE_REVIEW = [
     "Pre-submission meeting",
     "On-Site Evaluation|On Site Evaluation",
@@ -102,23 +106,10 @@ HCSBD_MILESTONE_REVIEW = [
     "Cancellation Letter"
     ]
 
-#HCSBD_MILESTONE_REVIEW_OF_RESPONSE_TO_NOC = ["Review of Response to NOC/c‑QN","Response filed (Letter of Undertaking)","Clinical/Medical Evaluation complete","Notice of Compliance (NOC) issued by Director General, Biologic and Radiopharmaceutical Drugs Directorate under the Notice of Compliance with Conditions (NOC/c) Guidance"]
 HCSBD_MILESTONE_AVOIDED_TITLES = ["Control Number","Original Submission","Refiled Submission","Submission No","Submission filed","Control No","Re-filed","Request for Reconsideration"]
 # Request for Reconsideration - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00156
 # Regulatory hold title - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00240
 # Patent Hold title - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00281
-# Grandes partes: Submission Milestone, Screening, Review (Screening y Review se van repitiendo)
-# CUIDADO: mas info en: https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailTwo.php?lang=en&linkID=SBD00499 (Review of Response to NOC/c‑QN:)
-# CUIDADO: mas reviews 3 en: https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00027
-
-#How to:
-#Header del excel, mergear y centrar https://xlsxwriter.readthedocs.io/example_merge1.html
-#1. empezar con HCSBD_MILESTONE_SUBMISSION
-#2. seguir con HCSBD_MILESTONE_SCREENING. Ojo, puede tener título "Screening" o título "Screening 1"
-#3. seguir con HCSBD_MILESTONE_REVIEW.Ojo, puede tener título "Review" o título "Review 1"
-#4. Si tiene "Screening 2" y/o "Review 2", seguir con HCSBD_MILESTONE_SCREENING y/o HCSBD_MILESTONE_REVIEW segunda tanda
-#5. Si tiene "Screening 3" y/o "Review 3", seguir con HCSBD_MILESTONE_SCREENING y/o HCSBD_MILESTONE_REVIEW tercera tanda
-#6. Si tiene "Screening 4" y/o "Review 4", seguir con HCSBD_MILESTONE_SCREENING y/o HCSBD_MILESTONE_REVIEW cuarta tanda
 
 
 BASE_URL_FDA = "https://www.pcpacanada.ca"
@@ -283,8 +274,8 @@ def getExcelRow_HCSBD(item):
     table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0].replace("<sup>","")+'")'
     table_row.append(item['link_id'])
 
-    response = f.api_get(API_REST_HCSBD_DETAIL.format("SBD00148"))
-    print("Start: "+API_REST_HCSBD_DETAIL.format("SBD00148"))
+    response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
+    #print("Start: "+API_REST_HCSBD_DETAIL.format(item['link_id']))
     
     product_row = []
     if "milestone_list" in response and "N/A" not in item['med_ingredient']:
