@@ -1,5 +1,5 @@
 import utils.funcs as f
-import datetime
+from datetime import date
 
 OUTPUT_FILE = "HCSBD-FDA-data-import.xlsx"
 OUTPUT_FILE_TMP = "HCSBD-FDA-data-import-tmp.xlsx"
@@ -125,7 +125,7 @@ THEAD_PRODUCT_FDA = ["pCPA File Number","Sponsor/Manufacturer","CADTH Project Nu
 
 def dateParser_HCSBD(str):
     if str and str != '':
-        return datetime.datetime.fromtimestamp(int(str)).strftime("%Y-%m-%d")        
+        return date.fromtimestamp(int(str))
     return ""
 
 def getMilestoneCompletedDate(element):
@@ -197,9 +197,9 @@ def removeDuplicateMilestones(array):
             if removeItem["milestone"] in array[0]["milestone"]:
                 array.remove(removeItem)
 
-    elif array and array[0]["milestone"] and ("Level" not in array[0]["milestone"] and "Appeal" not in array[0]["milestone"]) and [s for s in HCSBD_MILESTONE_AVOIDED_TITLES if s not in array[0]["milestone"]]:
-        if not checkTitle("Screening", array) and not checkTitle("Review", array):
-            print("wow")
+    #elif array and array[0]["milestone"] and ("Level" not in array[0]["milestone"] and "Appeal" not in array[0]["milestone"]) and [s for s in HCSBD_MILESTONE_AVOIDED_TITLES if s not in array[0]["milestone"]]:
+    #    if not checkTitle("Screening", array) and not checkTitle("Review", array):
+    #        print("wow")
 
 # HCSBD - Returns the detail row as a string
 def getMilestonesRow_HCSBD(array):

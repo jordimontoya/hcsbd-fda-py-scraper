@@ -19,7 +19,7 @@ def run_scraper():
     wb = xlsxwriter.Workbook(f.getAbsolutePath(cf.OUTPUT_FILE_TMP), {'constant_memory': True})
     bold = wb.add_format({'bold': True})
     underline = wb.get_default_url_format()
-    date = wb.add_format({'num_format': 'dd-mmm-yyyy'})
+    date = wb.add_format({'num_format': 'dd-mm-yyyy'})
     merge_format = wb.add_format({
         'bold': 1,
         'align': 'center',
@@ -48,34 +48,8 @@ def run_scraper():
 
     # HCSBD - Create worksheet and set link format and date format
     worksheetHCSBD = wb.add_worksheet('HCSBD')
+    f.sheet_format_range(worksheetHCSBD, date, ["","A","B","C","E","F","G","H"])
     worksheetHCSBD.set_column('A:A', None, underline)
-    worksheetHCSBD.set_column('D:D', None, date)
-    worksheetHCSBD.set_column('E:E', None, date)
-    worksheetHCSBD.set_column('F:F', None, date)
-    worksheetHCSBD.set_column('G:G', None, date)
-    worksheetHCSBD.set_column('H:H', None, date)
-    worksheetHCSBD.set_column('I:I', None, date)
-    worksheetHCSBD.set_column('J:J', None, date)
-    worksheetHCSBD.set_column('K:K', None, date)
-    worksheetHCSBD.set_column('L:L', None, date)
-    worksheetHCSBD.set_column('M:M', None, date)
-    worksheetHCSBD.set_column('N:N', None, date)
-    worksheetHCSBD.set_column('O:O', None, date)
-    worksheetHCSBD.set_column('P:P', None, date)
-    worksheetHCSBD.set_column('Q:Q', None, date)
-    worksheetHCSBD.set_column('R:R', None, date)
-    worksheetHCSBD.set_column('S:S', None, date)
-    worksheetHCSBD.set_column('T:T', None, date)
-    worksheetHCSBD.set_column('U:U', None, date)
-    worksheetHCSBD.set_column('V:V', None, date)
-    worksheetHCSBD.set_column('W:W', None, date)
-    worksheetHCSBD.set_column('X:X', None, date)
-    worksheetHCSBD.set_column('Y:Y', None, date)
-    worksheetHCSBD.set_column('Z:Z', None, date)
-    worksheetHCSBD.set_column('AA:AA', None, date)
-    worksheetHCSBD.set_column('AB:AB', None, date)
-    worksheetHCSBD.set_column('AC:AC', None, date)
-    worksheetHCSBD.set_column('AD:AD', None, date)
 
     # HCSBD - Scraps table
     response = f.api_get(cf.API_REST_HCSBD_LIST)["data"]
@@ -87,8 +61,8 @@ def run_scraper():
     worksheetHCSBD.merge_range('W1:AM1', 'Screening 1', merge_format_screening)
     worksheetHCSBD.merge_range('AN1:CH1', 'Review 1', merge_format_review)
     worksheetHCSBD.merge_range('CI1:CY1', 'Screening 2', merge_format_screening)
-    worksheetHCSBD.merge_range('CZ1:EM1', 'Review 2', merge_format_review)
-    worksheetHCSBD.merge_range('ET1:FK1', 'Screening 3', merge_format_screening)
+    worksheetHCSBD.merge_range('CZ1:ET1', 'Review 2', merge_format_review)
+    worksheetHCSBD.merge_range('EU1:FK1', 'Screening 3', merge_format_screening)
     worksheetHCSBD.merge_range('FL1:HF1', 'Review 3', merge_format_review)
 
     # HCSBD - Builds and writes excel's subheader

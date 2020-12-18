@@ -2,6 +2,7 @@ import os, sys
 import requests
 import json
 import re
+import string
 from bs4 import BeautifulSoup
 from multiprocessing.dummy import Pool  # This is a thread-based Pool
 from multiprocessing import cpu_count
@@ -64,3 +65,9 @@ def excel_writer(func_name, worksheet, trs):
     for result in result_iter:
         worksheet.write_row(row, 0, result)
         row += 1
+
+def sheet_format_range(sheet, format, array):
+    if array:
+        for c1 in array:
+            for c2 in string.ascii_uppercase:
+                sheet.set_column(c1+c2 +":"+ c1+c2, None, format)
