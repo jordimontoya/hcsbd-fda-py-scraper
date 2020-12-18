@@ -1,5 +1,7 @@
 import os, sys
 import requests
+import json
+import re
 from bs4 import BeautifulSoup
 from multiprocessing.dummy import Pool  # This is a thread-based Pool
 from multiprocessing import cpu_count
@@ -33,10 +35,18 @@ def scrapBaseUrl(url):
     r.encoding = 'utf-8'
     return BeautifulSoup(r.text, 'lxml')
 
+def api_get(url):
+    r = requests.get(url = url).text
+    return json.loads(r)
+
 def deleteSheet(wb, sheet_name):
     for sheet in wb.sheets:
         if sheet_name in sheet.name:
             sheet.delete()
+
+def removeHtmlTagsFromString(str):
+    str = str.strip().replace("<br>", " ").replace("<br/>", " ")
+    return re.sub('<[^<]+?>', '', str)
 
 # Returns excel columns' head as array
 def getExcelHead(table, arr_head):
@@ -49,7 +59,7 @@ def excel_writer(func_name, worksheet, trs):
     chunksize = FILE_LINES // NUM_WORKERS * 4
     pool = Pool(NUM_WORKERS)
 
-    row = 1
+    row = 2
     result_iter = pool.imap(func_name, trs)
     for result in result_iter:
         worksheet.write_row(row, 0, result)

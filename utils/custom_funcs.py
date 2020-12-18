@@ -1,149 +1,293 @@
 import utils.funcs as f
-from datetime import datetime
+import datetime
 
 OUTPUT_FILE = "HCSBD-FDA-data-import.xlsx"
 OUTPUT_FILE_TMP = "HCSBD-FDA-data-import-tmp.xlsx"
 BASE_URL_HCSBD_1 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID="
 BASE_URL_HCSBD_2 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailTwo.php?lang=en&linkID="
-API_REST_HCSBD = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?term=&pType=sbd&lang=en"
-#API_REST_KEYS = ["brand_name","med_ingredient","manufacturer"]
+BASE_URL_HCSBD_3 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-medical-device-detailOne.php?lang=en&linkID="
+API_REST_HCSBD_LIST = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?term=&pType=sbd&lang=en"
+API_REST_HCSBD_DETAIL = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?linkID={}&pType=sbd&lang=en"
+#to not take items : ["Control Number",] #duplicated value: https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00390
+API_REST_KEYS_LIST = ["brand_name","med_ingredient","manufacturer"]
 
-THEAD_PRODUCT_HCSBD = ["Brand name","Medicinal ingredient","Manufacturer"]
+HCSBD_MILESTONE_SUBMISSION = [
+    "Pre-submission 1|Pre-submission|Pre&#8209;submission",
+    "Pre-submission 2|Pre-submission",
+    "Advance Consideration",
+    "Submission filed|Submissionfiled",
+    "Acceptance Letter issued",
+    "Rolling New Drug Submission (NDS) filed",
+    "Administrative information, Cross-Reference to Rolling NDS",
+    "Approval issued by Director","Refusal"
+    ]
+
+HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS = [
+    "Filed",
+    "Advance Consideration",
+    "Request for reconsideration",
+    "Health Canada requested withdrawal of priority status",
+    "Sponsor withdrew priority status",
+    "Approval issued|Approved|Granted",
+    "Rejection issued|Rejection",
+    "Acceptance Letter",
+    "Submission filed"
+    ]
+HCSBD_MILESTONE_SCREENING = [
+    "Pre-submission meeting",
+    "Quality",
+    "Clinical",
+    "Deficiency Notice issued",
+    "NON issued",
+    "Pre-response to NON meeting",
+    "Response filed",
+    "Update Notice issued",
+    "Submission received in Regulatory Affairs Division (RAD)",
+    "Acceptance Letter",
+    "Rejection Letter issued",
+    "Request for Reconsideration|Reconsideration Decision Letter issued",
+    "Labelling Review",
+    "Response received",
+    "Approval issued",
+    "Submission filed",
+    "NOC|Notice of Compliance"
+    ]
+HCSBD_MILESTONE_REVIEW = [
+    "Pre-submission meeting",
+    "On-Site Evaluation|On Site Evaluation",
+    "SAC Teleconference",
+    "Review of Risk Management Plan",
+    "Labelling Review",
+    "Biopharmaceutics",
+    "Consistency Sample testing",
+    "Medical",
+    "Quality",
+    "Comprehensive",
+    "Biostatistics|Biostat",
+    "Non-clinical",
+    "Clinical",
+    "Radiation Dosimetry",
+    "Medical Devices",
+    "Device",
+    "Electrocardiogram",
+    "Label",
+    "Acceptance Letter",
+    "Response received",
+    "Scientific Advisory",
+    "Review of Response to NOC/c‑QN",
+    "Revised Qualifying Notice",
+    "NOC/c-QN",
+    "NOC/c|Notice of Compliance with Conditions",
+    "NOC|Notice of Compliance",
+    "Level 1 Appeal",
+    "NOD/W|Notice of Deficiency/Withdrawal",
+    "NON/NOD"
+    "NOD|Notice of Deficiency",
+    "Look Alike Sound Alike name change and revised NOC issued",
+    "Response to NON filed",
+    "NON/W",
+    "NON|Notice of Non Compliance",
+    "NOD|Notice of Decision",
+    "Expert Advisory Panel meeting",
+    "Acceptance of Advance Consideration",
+    "Rejection issued",
+    "Response filed",
+    "Request to cancel submission filed",
+    "Submission re-filed Control","Submission subject to Federal Court Stay",
+    "Filed",
+    "Interim Order issued",
+    "Authorization for sale",
+    "Submission withdrawn by sponsor|Withdrawal/Cancellation by sponsor|Sponsor withdrew the New Drug Submission|Submission cancelled by sponsor|withdrew submission",
+    "Submission cancelled - administrative",
+    "Cancellation Letter"
+    ]
+
+#HCSBD_MILESTONE_REVIEW_OF_RESPONSE_TO_NOC = ["Review of Response to NOC/c‑QN","Response filed (Letter of Undertaking)","Clinical/Medical Evaluation complete","Notice of Compliance (NOC) issued by Director General, Biologic and Radiopharmaceutical Drugs Directorate under the Notice of Compliance with Conditions (NOC/c) Guidance"]
+HCSBD_MILESTONE_AVOIDED_TITLES = ["Control Number","Original Submission","Refiled Submission","Submission No","Submission filed","Control No","Re-filed","Request for Reconsideration"]
+# Request for Reconsideration - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00156
+# Regulatory hold title - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00240
+# Patent Hold title - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00281
+# Grandes partes: Submission Milestone, Screening, Review (Screening y Review se van repitiendo)
+# CUIDADO: mas info en: https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailTwo.php?lang=en&linkID=SBD00499 (Review of Response to NOC/c‑QN:)
+# CUIDADO: mas reviews 3 en: https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00027
+
+#How to:
+#Header del excel, mergear y centrar https://xlsxwriter.readthedocs.io/example_merge1.html
+#1. empezar con HCSBD_MILESTONE_SUBMISSION
+#2. seguir con HCSBD_MILESTONE_SCREENING. Ojo, puede tener título "Screening" o título "Screening 1"
+#3. seguir con HCSBD_MILESTONE_REVIEW.Ojo, puede tener título "Review" o título "Review 1"
+#4. Si tiene "Screening 2" y/o "Review 2", seguir con HCSBD_MILESTONE_SCREENING y/o HCSBD_MILESTONE_REVIEW segunda tanda
+#5. Si tiene "Screening 3" y/o "Review 3", seguir con HCSBD_MILESTONE_SCREENING y/o HCSBD_MILESTONE_REVIEW tercera tanda
+#6. Si tiene "Screening 4" y/o "Review 4", seguir con HCSBD_MILESTONE_SCREENING y/o HCSBD_MILESTONE_REVIEW cuarta tanda
+
 
 BASE_URL_FDA = "https://www.pcpacanada.ca"
 PATH_FDA = "/negotiations"
 TABLE_CLASS_FDA = "datatable"
+API_REST_FDA = "https://api.fda.gov/drug/drugsfda.json?search=submissions.submission_class_code_description:%22Type%201%20-%20New%20Molecular%20Entity%22&limit=1000&sort=submissions.submission_status_date:desc"
+#PDF to text pro version: https://stackoverflow.com/questions/34819638/python-scraping-pdf-from-url
+#and this one:https://stackoverflow.com/questions/26494211/extracting-text-from-a-pdf-file-using-pdfminer-in-python/26495057#26495057
+
+#PDF to text: https://stackoverflow.com/questions/52683133/text-scraping-a-pdf-with-python-pdfquery
+#PDF to text: https://stackoverflow.com/questions/59130672/how-to-scrape-pdfs-using-python-specific-content-only
 THEAD_PRODUCT_FDA = ["pCPA File Number","Sponsor/Manufacturer","CADTH Project Number","pCPA Engagement Letter Issued","Negotiation Process Concluded"]
 
 def dateParser_HCSBD(str):
-    if str and str != 'N/A':
-        return datetime.strptime(str, '%B %d, %Y')
-    return str
-
-def dateParser_FDA(str):
-    if str and str != 'Not Applicable':
-        return datetime.strptime(str, '%Y-%m-%d')
-    return str
-
-# CADTH - Parse product table
-def parseProductTable(element, product_tr_list):
-    if product_tr_list.find("th", text=lambda t: t and element in t):
-        product_td = product_tr_list.find("th", text=lambda t: t and element in t).find_next_sibling("td").get_text(separator=" ").strip()
-        product_td = product_td.replace('\n', ' ').replace('\r', '')
-        return product_td
-
+    if str and str != '':
+        return datetime.datetime.fromtimestamp(int(str)).strftime("%Y-%m-%d")        
     return ""
 
-# CADTH - Clean product element detail
-def cleanProductElement(element, soup):
-    if element == "Manufacturer":
-        #clean manufacturer value
-        manufacturer = soup.find("p", class_="field_manufacturer")
-        manufacturer.strong.decompose()
-        return manufacturer.get_text(separator=" ").strip()
+def getMilestoneCompletedDate(element):
+    if element["completed_date"]:
+        date = element["completed_date"].replace("/Date(", "")
+        if "-" in date:
+            date = date.split("-")[0]
+        elif "+" in date:
+            date = date.split("+")[0]
 
-    elif element == "Submission Type" and soup.find("p", class_="field_submission_type"):
-        #clean submission type value
-        submission_type = soup.find("p", class_="field_submission_type")
-        submission_type.strong.decompose()
-        return submission_type.get_text(separator=" ").strip()
+        date = date.strip().replace('\n', '').replace('\r', '')[0:10]
 
-    elif soup.find("table", class_="cdr_milestones_table"):
-        product_tr_list = soup.find("table", class_="cdr_milestones_table")
-        if product_tr_list.find("th", text=lambda t: t and element in t):
-            product_td = product_tr_list.find("th", text=lambda t: t and element in t).find_next_sibling("td").get_text(separator=" ").strip()
-            product_td = product_td.replace('\n', ' ').replace('\r', '')
-            return product_td
+        return dateParser_HCSBD(date)
+    else:
+        return ""
+
+# Looping through milestone_list and if found, retrieve date and remove item from list
+# If milestone title found (<b> or <strong>, break loop and return "", this means next phase starts)
+def getProductMilestones(element, array):
+    for index, item in enumerate(array):
+        if "<b>" in item["milestone"] or "<strong>" in item["milestone"] or "<p>" in item["milestone"]:
+            if "Pre-submission meeting" in item["milestone"] or "Submission filed" in item["milestone"]:
+                date = getMilestoneCompletedDate(item)
+                del array[index]
+                return date
+            break
+        else:
+            if "|" in element:
+                if [s for s in element.lower().split("|") if s in item["milestone"].lower()]:
+                    date = getMilestoneCompletedDate(item)
+                    del array[index]
+                    return date
+            
+            elif element.lower() in item["milestone"].lower():
+                date = getMilestoneCompletedDate(item)
+                del array[index]
+                return date
         
     return ""
 
-# CADTH - Clean product element detail
-def replaceEmptyProductElement(product_row, element, product_tr_list):
-    if product_tr_list.find("th", text=lambda t: t and element in t):
-        product_td = product_tr_list.find("th", text=lambda t: t and element in t).find_next_sibling("td").get_text(separator=" ").strip()
-        product_td = product_td.replace('\n', ' ').replace('\r', '')
-        return product_td
+def isTitle(item):
+    return "<b>" in item["milestone"] or "<strong>" in item["milestone"] or "<p>" in item["milestone"]  or ("Screening" in item["milestone"] and not item["completed_date"]) or ("Review" in item["milestone"] and not item["completed_date"]) or ("Request for priority status" in item["milestone"] and not item["completed_date"])
 
-    return product_row
+def removeMilestoneTitle(array):
+    if isTitle(array[0]):
+        array.pop(0)
 
-# CADTH - Returns the detail row as a string
-def getProductDetail_HCSBD(soup):
+def checkTitle(title, array):
+    if array and array[0]["milestone"] and isTitle(array[0]):
+        if array and title.lower() in array[0]["milestone"].lower():
+            return True
+        elif ("Level" in array[0]["milestone"] and "Appeal" in array[0]) or [s for s in HCSBD_MILESTONE_AVOIDED_TITLES if s in array[0]["milestone"]]:
+            array.pop(0)
+            removeDuplicateMilestones(array)
+            if array and title.lower() in array[0]["milestone"].lower():
+                return True
+
+    return False
+
+def removeDuplicateMilestones(array):
+    toRemove = []
+    if array and array[0]["milestone"] and not isTitle(array[0]):
+        for item in array:
+            if not isTitle(item):
+                toRemove.append(item)
+            else:
+                break
+        for removeItem in toRemove:
+            if removeItem["milestone"] in array[0]["milestone"]:
+                array.remove(removeItem)
+
+    elif array and array[0]["milestone"] and ("Level" not in array[0]["milestone"] and "Appeal" not in array[0]["milestone"]) and [s for s in HCSBD_MILESTONE_AVOIDED_TITLES if s not in array[0]["milestone"]]:
+        if not checkTitle("Screening", array) and not checkTitle("Review", array):
+            print("wow")
+
+# HCSBD - Returns the detail row as a string
+def getMilestonesRow_HCSBD(array):
     product_row = []
 
-    #1st detected format (ex: https://www.cadth.ca/xalkori-resubmission-first-line-advanced-nsclc-details)
-    #2nd detected format (ex: https://www.cadth.ca/ibrutinib-imbruvica-leukemia)
-    if soup.find("table", class_=TABLE_PRODUCT_CLASS_HCSBD):
-        product_tr_list = soup.find("table", class_=TABLE_PRODUCT_CLASS_HCSBD)
-        product_row = [parseProductTable(element, product_tr_list) for element in THEAD_PRODUCT_HCSBD]
+    product_row = [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SUBMISSION]
+    
+    if checkTitle("Request for priority status", array):
+        removeMilestoneTitle(array)
+        if any("Request for priority status" in sublist["milestone"] for sublist in array):
+            array = [sublist for sublist in array if "Request for priority status" not in sublist["milestone"]]
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
+    
+    # Screening 1
+    if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
+        removeDuplicateMilestones(array)
+    if checkTitle("Screening", array) or checkTitle("Screnning", array):
+        removeMilestoneTitle(array)
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SCREENING]
 
-    #3rd detected format (ex: https://www.cadth.ca/aripiprazole-25)
-    #4th detected format (ex: https://www.cadth.ca/pegfilgrastim-6)
-    elif soup.find("div", class_="publish-date"):
-        product_row = [cleanProductElement(element, soup) for element in THEAD_PRODUCT_HCSBD]
+    # Review 1
+    if not checkTitle("Review", array):
+        removeDuplicateMilestones(array)
+    if checkTitle("Review", array):
+        removeMilestoneTitle(array)
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REVIEW]
 
-    else:
-        product_row.append("Unable to fetch data, new web format")
+    # Screening 2
+    if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
+        removeDuplicateMilestones(array)
+    if checkTitle("Screening", array) or checkTitle("Screnning", array):
+        removeMilestoneTitle(array)
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SCREENING]
+
+    # Review 2
+    if not checkTitle("Review", array):
+        removeDuplicateMilestones(array)
+    if checkTitle("Review", array):
+        removeMilestoneTitle(array)
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REVIEW]
+
+    # Screening 3
+    if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
+        removeDuplicateMilestones(array)
+    if checkTitle("Screening", array) or checkTitle("Screnning", array):
+        removeMilestoneTitle(array)
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SCREENING]
+
+    # Review 3
+    if not checkTitle("Review", array):
+        removeDuplicateMilestones(array)
+    if checkTitle("Review", array):
+        removeMilestoneTitle(array)
+        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REVIEW]
 
     return product_row
 
-# CADTH - Returns excel row as a string
+# HCSBD - Returns excel row as a string
 def getExcelRow_HCSBD(item):
+    table_row = [item[""+element] for element in API_REST_KEYS_LIST]
 
     # product url
     url_product = BASE_URL_HCSBD_1 + item['link_id']
+
     if item['template'] == 2:
-        url_product = BASE_URL_HCSBD_1 + item['link_id']
+        url_product = BASE_URL_HCSBD_2 + item['link_id']
 
-    table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0]+'")'
+    if "N/A" in item['med_ingredient']:
+        url_product = BASE_URL_HCSBD_3 + item['link_id']
 
-    soup = f.scrapBaseUrl(url_product)
-    product_row = getProductDetail_HCSBD(soup)
+    table_row[0] = table_row[0].replace("<sup>"," ").replace("</sup>","")
+    table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0].replace("<sup>","")+'")'
+    table_row.append(item['link_id'])
 
-    excel_row = table_row + product_row
-
-    # Parse dates
-    excel_row[5] = dateParser_HCSBD(excel_row[5])
-    excel_row[6] = dateParser_HCSBD(excel_row[6])
-    excel_row[12] = dateParser_HCSBD(excel_row[12])
-    excel_row[15] = dateParser_HCSBD(excel_row[15])
-    excel_row[16] = dateParser_HCSBD(excel_row[16])
-    excel_row[17] = dateParser_HCSBD(excel_row[17])
-    excel_row[20] = dateParser_HCSBD(excel_row[20])
-    excel_row[21] = dateParser_HCSBD(excel_row[21])
-    excel_row[22] = dateParser_HCSBD(excel_row[22])
-    excel_row[23] = dateParser_HCSBD(excel_row[23])
-    excel_row[24] = dateParser_HCSBD(excel_row[24])
-    excel_row[25] = dateParser_HCSBD(excel_row[25])
-    excel_row[26] = dateParser_HCSBD(excel_row[26])
-
-    return excel_row
-
-# CADTH - Returns the detail row as a string
-def getProductDetail_FDA(soup):
-    product_row = []
-    product_row.append(soup.find("span", class_="views-label-nid").find_next_sibling("span").get_text(separator=" ").strip())
-    product_row.append(soup.find("span", class_="views-label-field-manufacturer-name").find_next_sibling("div").get_text(separator=" ").strip())
-    product_row.append(soup.find("span", class_="views-label-field-cadth-project-id").find_next_sibling("div").get_text(separator=" ").strip())
-    product_row.append(soup.find("span", class_="views-label-field-engagement-date").find_next_sibling("div").get_text(separator=" ").strip())
-    product_row.append(soup.find("span", class_="views-label-field-close-date").find_next_sibling("div").get_text(separator=" ").strip())
+    response = f.api_get(API_REST_HCSBD_DETAIL.format("SBD00148"))
+    print("Start: "+API_REST_HCSBD_DETAIL.format("SBD00148"))
     
-    return product_row
+    product_row = []
+    if "milestone_list" in response and "N/A" not in item['med_ingredient']:
+        product_row = getMilestonesRow_HCSBD(response["milestone_list"])
 
-# CADTH - Returns excel row as a string
-def getExcelRow_FDA(tr):
-    table_row = [e.get_text(separator=" ").strip() for e in tr.find_all("td")]
-
-    # product url
-    url_product = BASE_URL_FDA + tr.td.a['href']
-    table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0]+'")'
-
-    soup = f.scrapBaseUrl(url_product)
-    product_row = getProductDetail_FDA(soup)
-
-    excel_row = table_row + product_row
-
-    # Parse dates
-    excel_row[7] = dateParser_FDA(excel_row[7])
-    excel_row[8] = dateParser_FDA(excel_row[8])
-
-    return excel_row
+    return table_row + product_row
