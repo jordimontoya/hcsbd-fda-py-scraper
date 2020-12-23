@@ -51,16 +51,16 @@ def removeHtmlTagsFromString(str):
 
 # Returns excel columns' head as array
 def getExcelHead(table, arr_head):
-    thead = [e.text for e in table.find("thead").find_all("th")]
+    thead = [e.text.strip() for e in table.find("thead").find_all("th")]
     return thead + arr_head
 
-def excel_writer(func_name, worksheet, trs):   
+def excel_writer(func_name, worksheet, trs, startRow):   
     FILE_LINES = len(trs)
     NUM_WORKERS = cpu_count() * 2
     chunksize = FILE_LINES // NUM_WORKERS * 4
     pool = Pool(NUM_WORKERS)
 
-    row = 2
+    row = startRow
     result_iter = pool.imap(func_name, trs)
     for result in result_iter:
         worksheet.write_row(row, 0, result)
