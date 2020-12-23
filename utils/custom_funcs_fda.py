@@ -1,5 +1,5 @@
 import utils.funcs as f
-from datetime import date
+from datetime import datetime
 
 TABLE_CLASS_FDA = "table-striped"
 TABLE_PRODUCT_CLASS_FDA = "exampleApplOrig"
@@ -7,6 +7,7 @@ API_REST_FDA = "https://www.fda.gov/drugs/new-drugs-fda-cders-new-molecular-enti
 FDA_YEARS = ["2020","2019","2018","2017","2016","2015"]
 THEAD_PRODUCT_FDA_TABLE = ["Drug Name","Active Ingredient","Approval Date","FDA-approved use on approval date"]
 THEAD_PRODUCT_FDA_DETAIL = ["Action Date","Submission","Action Type","Submission Classification","Review Priority; Orphan Status","Letters, Reviews, Labels, Patient Package Insert", "Notes"]
+PDF_DATE_PATTERNS = ["dated and received (.*), and your amendments","dated and received (.*) and your amendments","dated and received (.*), and","application \(NDA\) dated (.*), received","application \(NDA\) dated (.*), submitted"]#,"your submission dated (.*)."
 #API_REST_FDA = "https://api.fda.gov/drug/drugsfda.json?search=submissions.submission_class_code_description:%22Type%201%20-%20New%20Molecular%20Entity%22&limit=1000&sort=submissions.submission_status_date:desc"
 #PDF to text pro version: https://stackoverflow.com/questions/34819638/python-scraping-pdf-from-url
 #and this one:https://stackoverflow.com/questions/26494211/extracting-text-from-a-pdf-file-using-pdfminer-in-python/26495057#26495057
@@ -15,9 +16,31 @@ THEAD_PRODUCT_FDA_DETAIL = ["Action Date","Submission","Action Type","Submission
 #PDF to text: https://stackoverflow.com/questions/59130672/how-to-scrape-pdfs-using-python-specific-content-only
 
 def dateParser_fda(str):
-    if str and str != 'N/A':
+    if str:
         return datetime.strptime(str, '%B %d, %Y')
     return str
+
+def getDateFromPDF(product_row):
+    
+    if len(product_row) >= 5 and "appletter" in product_row[5]:
+        for url in product_row[5].splitlines():
+            if "appletter" in url:
+                pdf = f.pdf_get(url.strip())
+                pdf = pdf.replace('\n', ' ').replace('\r', '')
+                pdf = " ".join(pdf.split())
+                res = None
+                for pattern in PDF_DATE_PATTERNS:
+                    if f.re.search(pattern, pdf):
+                        res = f.re.search(pattern, pdf).group(1)
+                        break
+                
+                if res is None:
+                    print("res PDF: "+res)
+
+                return datetime.strptime(res, '%B %d, %Y')
+
+                #return dateParser_fda(res)
+    return ""
 
 # FDA - Clean product element detail
 def cleanColumns(td):
@@ -25,9 +48,9 @@ def cleanColumns(td):
         str = ""
         for a in td.find_all("a"):
             str = str + a["href"] + "\n "
-        return str.rstrip()
+        return str.strip()
 
-    return ""+td.text.strip()
+    return "" + td.text.strip()
 
 # FDA - Returns the detail row as a string
 def getProductDetail_fda(soup):
@@ -62,6 +85,8 @@ def getExcelRow_fda(tr):
 
         soup = f.scrapBaseUrl(url_product)
         product_row = getProductDetail_fda(soup)
+
+        product_row.append(getDateFromPDF(product_row))
 
     excel_row = table_row + product_row
 

@@ -89,7 +89,7 @@ def run_scraper():
     worksheetFDA.set_column('A:A', None, underline)
 
     # FDA - Builds and writes excel's head
-    worksheetFDA.write_row(0, 0, cffda.THEAD_PRODUCT_FDA_TABLE + cffda.THEAD_PRODUCT_FDA_DETAIL, bold)
+    worksheetFDA.write_row(0, 0, cffda.THEAD_PRODUCT_FDA_TABLE + cffda.THEAD_PRODUCT_FDA_DETAIL + ["PDF filed for approval"], bold)
 
     # FDA - Scraps tables
     trs = []
@@ -101,19 +101,16 @@ def run_scraper():
     for index, tr in enumerate(trs):
             if tr.find("th"):
                 del trs[index]
-                
+
     # FDA - Builds and writes data to excel
     #trs = trs[:10]
-    f.excel_writer(cffda.getExcelRow_fda, worksheetFDA, trs, 1)
-
-    #count = 0
-    #for tr in trs:
-        #if count == 497:
-        #    print(item)
-        #cffda.getExcelRow_fda(tr)
-        #count = count+1
+    #f.excel_writer(cffda.getExcelRow_fda, worksheetFDA, trs, 1)
+    
+    for tr in trs:
+        cffda.getExcelRow_fda(tr)
 
     worksheetFDA.set_column('J:J', None, link_format)
+    worksheetFDA.set_column('L:L', None, date)
         
     # Close csv file
     wb.close()

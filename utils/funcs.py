@@ -2,8 +2,10 @@ import os, sys
 import requests
 import json
 import re
+import io
 import string
 from bs4 import BeautifulSoup
+from pdfminer.high_level import extract_text
 from multiprocessing.dummy import Pool  # This is a thread-based Pool
 from multiprocessing import cpu_count
 
@@ -39,6 +41,10 @@ def scrapBaseUrl(url):
 def api_get(url):
     r = requests.get(url = url).text
     return json.loads(r)
+
+def pdf_get(url):
+    r = requests.get(url)
+    return extract_text(io.BytesIO(r.content))
 
 def deleteSheet(wb, sheet_name):
     for sheet in wb.sheets:
