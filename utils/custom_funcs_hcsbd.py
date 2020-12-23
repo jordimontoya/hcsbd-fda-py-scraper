@@ -111,18 +111,6 @@ HCSBD_MILESTONE_AVOIDED_TITLES = ["Control Number","Original Submission","Refile
 # Regulatory hold title - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00240
 # Patent Hold title - https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID=SBD00281
 
-
-BASE_URL_FDA = "https://www.pcpacanada.ca"
-PATH_FDA = "/negotiations"
-TABLE_CLASS_FDA = "datatable"
-API_REST_FDA = "https://api.fda.gov/drug/drugsfda.json?search=submissions.submission_class_code_description:%22Type%201%20-%20New%20Molecular%20Entity%22&limit=1000&sort=submissions.submission_status_date:desc"
-#PDF to text pro version: https://stackoverflow.com/questions/34819638/python-scraping-pdf-from-url
-#and this one:https://stackoverflow.com/questions/26494211/extracting-text-from-a-pdf-file-using-pdfminer-in-python/26495057#26495057
-
-#PDF to text: https://stackoverflow.com/questions/52683133/text-scraping-a-pdf-with-python-pdfquery
-#PDF to text: https://stackoverflow.com/questions/59130672/how-to-scrape-pdfs-using-python-specific-content-only
-THEAD_PRODUCT_FDA = ["pCPA File Number","Sponsor/Manufacturer","CADTH Project Number","pCPA Engagement Letter Issued","Negotiation Process Concluded"]
-
 def dateParser_HCSBD(str):
     if str and str != '':
         return date.fromtimestamp(int(str))
