@@ -1,11 +1,15 @@
 import os, sys
 import requests
+import urllib.request
 import json
 import re
-import io
+from io import StringIO, BytesIO
 import string
 from bs4 import BeautifulSoup
 from pdfminer.high_level import extract_text
+from pdfminer.converter import TextConverter
+from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
+from pdfminer.pdfpage import PDFPage
 from multiprocessing.dummy import Pool  # This is a thread-based Pool
 from multiprocessing import cpu_count
 
@@ -44,7 +48,42 @@ def api_get(url):
 
 def pdf_get(url):
     r = requests.get(url)
-    return extract_text(io.BytesIO(r.content))
+    return extract_text(BytesIO(r.content))
+
+def extract_text_from_pdf_url(url, user_agent=None):
+    resource_manager = PDFResourceManager()
+    fake_file_handle = StringIO()
+    converter = TextConverter(resource_manager, fake_file_handle)    
+
+    if user_agent == None:
+        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36'
+
+    headers = {'User-Agent': user_agent}
+    request = urllib.request.Request(url, data=None, headers=headers)
+
+    response = urllib.request.urlopen(request).read()
+    fb = BytesIO(response)
+
+    page_interpreter = PDFPageInterpreter(resource_manager, converter)
+
+    for page in PDFPage.get_pages(fb,
+                                caching=True,
+                                check_extractable=True):
+        page_interpreter.process_page(page)
+
+    text = fake_file_handle.getvalue()
+
+    # close open handles
+    fb.close()
+    converter.close()   
+    fake_file_handle.close()
+
+    if text:
+        # If document has instances of \xa0 replace them with spaces.
+        # NOTE: \xa0 is non-breaking space in Latin1 (ISO 8859-1) & chr(160)
+        text = text.replace(u'\xa0', u' ')
+
+        return text
 
 def deleteSheet(wb, sheet_name):
     for sheet in wb.sheets:

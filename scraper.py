@@ -20,7 +20,7 @@ def run_scraper():
     wb = xlsxwriter.Workbook(f.getAbsolutePath(cfhcsbd.OUTPUT_FILE_TMP), {'constant_memory': True})
     bold = wb.add_format({'bold': True})
     underline = wb.get_default_url_format()
-    date = wb.add_format({'num_format': 'dd-mm-yyyy'})
+    date = wb.add_format({'num_format': 'mm-dd-yyyy'})
     merge_format = wb.add_format({
         'bold': 1,
         'align': 'center',
@@ -90,6 +90,10 @@ def run_scraper():
 
     # FDA - Builds and writes excel's head
     worksheetFDA.write_row(0, 0, cffda.THEAD_PRODUCT_FDA_TABLE + cffda.THEAD_PRODUCT_FDA_DETAIL + ["PDF filed for approval"], bold)
+    worksheetFDA.set_column('J:J', None, link_format)
+    worksheetFDA.set_column('C:C', None, date)
+    worksheetFDA.set_column('E:E', None, date)
+    worksheetFDA.set_column('L:L', None, date)
 
     # FDA - Scraps tables
     trs = []
@@ -103,14 +107,10 @@ def run_scraper():
                 del trs[index]
 
     # FDA - Builds and writes data to excel
-    #trs = trs[:10]
     #f.excel_writer(cffda.getExcelRow_fda, worksheetFDA, trs, 1)
-    
+
     for tr in trs:
         cffda.getExcelRow_fda(tr)
-
-    worksheetFDA.set_column('J:J', None, link_format)
-    worksheetFDA.set_column('L:L', None, date)
         
     # Close csv file
     wb.close()
