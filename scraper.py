@@ -49,7 +49,7 @@ def run_scraper():
 
     # HCSBD - Create worksheet and set link format and date format
     worksheetHCSBD = wb.add_worksheet('HCSBD')
-    f.sheet_format_range(worksheetHCSBD, date, ["","A","B","C","E","F","G","H"])
+    f.sheet_format_range(worksheetHCSBD, date, ["","A","B","C","D","E","F","G","H"])
     worksheetHCSBD.set_column('A:A', None, underline)
 
     # HCSBD - Builds and writes excel's header section
@@ -73,12 +73,8 @@ def run_scraper():
     # HCSBD - Builds and writes data to excel
     f.excel_writer(cfhcsbd.getExcelRow_HCSBD, worksheetHCSBD, response, 2)
 
-    #count = 0
     #for item in response:
-    #    if count == 497:
-    #        print(item)
     #    cfhcsbd.getExcelRow_HCSBD(item)
-    #    count = count+1
     
     # FDA - Create worksheet and set link format and date format
     worksheetFDA = wb.add_worksheet('FDA')
@@ -152,7 +148,7 @@ def run_from_exe():
         workbook_create.close()
         workbook = app.books.open(f.getAbsolutePath(cfhcsbd.OUTPUT_FILE))
 
-    override_sheet('HCSBD', 'A1:BZ5000')
+    override_sheet('HCSBD', 'A1:HH2000')
     override_sheet('FDA', 'A1:AZ5000')
 
     # Remove tmp file
@@ -173,7 +169,7 @@ def run_from_xlsb():
     
     run_scraper()
 
-    override_sheet('HCSBD', 'A1:AZ5000')
+    override_sheet('HCSBD', 'A1:HH2000')
     override_sheet('FDA', 'A1:AZ5000')
     # Remove tmp file
     f.os.remove(f.getAbsolutePath(cfhcsbd.OUTPUT_FILE_TMP))

@@ -258,7 +258,12 @@ def getExcelRow_HCSBD(item):
     if "N/A" in item['med_ingredient']:
         url_product = BASE_URL_HCSBD_3 + item['link_id']
 
-    table_row[0] = table_row[0].replace("<sup>"," ").replace("</sup>","")
+    if "</sup>" in table_row[0]:
+        table_row[0] = table_row[0].replace("<sup>"," ").split('</sup>')[0]
+
+    if "<em>" in table_row[0]:
+        table_row[0] = table_row[0].replace("<em>"," ").split('</em>')[0]
+
     table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0].replace("<sup>","")+'")'
     table_row.append(item['link_id'])
 
