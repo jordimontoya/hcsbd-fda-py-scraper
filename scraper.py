@@ -67,6 +67,8 @@ def run_scraper():
     header_arr = cfhcsbd.API_REST_KEYS_LIST + ["id"] + listHeader(cfhcsbd.HCSBD_MILESTONE_SUBMISSION) + listHeader(cfhcsbd.HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS) + listHeader(cfhcsbd.HCSBD_MILESTONE_SCREENING) + listHeader(cfhcsbd.HCSBD_MILESTONE_REVIEW) + listHeader(cfhcsbd.HCSBD_MILESTONE_SCREENING) + listHeader(cfhcsbd.HCSBD_MILESTONE_REVIEW) + listHeader(cfhcsbd.HCSBD_MILESTONE_SCREENING) + listHeader(cfhcsbd.HCSBD_MILESTONE_REVIEW)
     worksheetHCSBD.write_row(1, 0, header_arr, bold)
 
+    print('Scraping HCSBD... START')
+
     # HCSBD - Scraps table
     response = f.api_get(cfhcsbd.API_REST_HCSBD_LIST)["data"]
     
@@ -75,6 +77,8 @@ def run_scraper():
 
     #for item in response:
     #    cfhcsbd.getExcelRow_HCSBD(item)
+
+    print('Scraping HCSBD... END')
     
     # FDA - Create worksheet and set link format and date format
     worksheetFDA = wb.add_worksheet('FDA')
@@ -86,6 +90,8 @@ def run_scraper():
     worksheetFDA.set_column('C:C', None, date)
     worksheetFDA.set_column('E:E', None, date)
     worksheetFDA.set_column('L:L', None, date)
+
+    print('Scraping FDA... START')
 
     # FDA - Scraps tables
     trs = []
@@ -103,6 +109,8 @@ def run_scraper():
 
     #for tr in trs:
     #    cffda.getExcelRow_fda(tr)
+
+    print('Scraping FDA... END')
         
     # Close csv file
     wb.close()
