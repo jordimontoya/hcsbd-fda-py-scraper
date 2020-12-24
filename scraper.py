@@ -18,6 +18,7 @@ def run_scraper():
 
     # Create a workbook and declare specific formats.
     wb = xlsxwriter.Workbook(f.getAbsolutePath(cfhcsbd.OUTPUT_FILE_TMP), {'constant_memory': True})
+    
     bold = wb.add_format({'bold': True})
     underline = wb.get_default_url_format()
     date = wb.add_format({'num_format': 'mm-dd-yyyy'})
@@ -49,15 +50,11 @@ def run_scraper():
         'color': 'blue', 
         'underline': True, 
         'text_wrap': True})
-        
 
     # HCSBD - Create worksheet and set link format and date format
     worksheetHCSBD = wb.add_worksheet('HCSBD')
     f.sheet_format_range(worksheetHCSBD, date, ["","A","B","C","E","F","G","H"])
     worksheetHCSBD.set_column('A:A', None, underline)
-
-    # HCSBD - Scraps table
-    response = f.api_get(cfhcsbd.API_REST_HCSBD_LIST)["data"]
 
     # HCSBD - Builds and writes excel's header section
     worksheetHCSBD.merge_range('A1:D1', 'Data entries', merge_format)
@@ -73,9 +70,12 @@ def run_scraper():
     # HCSBD - Builds and writes excel's subheader
     header_arr = cfhcsbd.API_REST_KEYS_LIST + ["id"] + listHeader(cfhcsbd.HCSBD_MILESTONE_SUBMISSION) + listHeader(cfhcsbd.HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS) + listHeader(cfhcsbd.HCSBD_MILESTONE_SCREENING) + listHeader(cfhcsbd.HCSBD_MILESTONE_REVIEW) + listHeader(cfhcsbd.HCSBD_MILESTONE_SCREENING) + listHeader(cfhcsbd.HCSBD_MILESTONE_REVIEW) + listHeader(cfhcsbd.HCSBD_MILESTONE_SCREENING) + listHeader(cfhcsbd.HCSBD_MILESTONE_REVIEW)
     worksheetHCSBD.write_row(1, 0, header_arr, bold)
+
+    # HCSBD - Scraps table
+    response = f.api_get(cfhcsbd.API_REST_HCSBD_LIST)["data"]
     
     # HCSBD - Builds and writes data to excel
-    #f.excel_writer(cfhcsbd.getExcelRow_HCSBD, worksheetHCSBD, response, 2)
+    f.excel_writer(cfhcsbd.getExcelRow_HCSBD, worksheetHCSBD, response, 2)
 
     #count = 0
     #for item in response:
@@ -107,10 +107,10 @@ def run_scraper():
                 del trs[index]
 
     # FDA - Builds and writes data to excel
-    #f.excel_writer(cffda.getExcelRow_fda, worksheetFDA, trs, 1)
+    f.excel_writer(cffda.getExcelRow_fda, worksheetFDA, trs, 1)
 
-    for tr in trs:
-        cffda.getExcelRow_fda(tr)
+    #for tr in trs:
+    #    cffda.getExcelRow_fda(tr)
         
     # Close csv file
     wb.close()
