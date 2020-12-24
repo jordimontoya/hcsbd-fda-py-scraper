@@ -104,8 +104,6 @@ def getExcelRow_fda(tr):
         url_product = tr.find("a")["href"].replace("httphttp", "http").strip()
         table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0]+'")'
 
-        print("Start: "+url_product)
-
         soup = f.scrapBaseUrl(url_product)
         product_row = getProductDetail_fda(soup)
 

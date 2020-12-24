@@ -46,10 +46,6 @@ def run_scraper():
         'align': 'center',
         'valign': 'vcenter',
         'bg_color': '#95E0AA'})
-    link_format = wb.add_format({
-        'color': 'blue', 
-        'underline': True, 
-        'text_wrap': True})
 
     # HCSBD - Create worksheet and set link format and date format
     worksheetHCSBD = wb.add_worksheet('HCSBD')
@@ -90,7 +86,7 @@ def run_scraper():
 
     # FDA - Builds and writes excel's head
     worksheetFDA.write_row(0, 0, cffda.THEAD_PRODUCT_FDA_TABLE + cffda.THEAD_PRODUCT_FDA_DETAIL + ["PDF filed for approval"], bold)
-    worksheetFDA.set_column('J:J', None, link_format)
+    worksheetFDA.set_column('J:J', None, underline)
     worksheetFDA.set_column('C:C', None, date)
     worksheetFDA.set_column('E:E', None, date)
     worksheetFDA.set_column('L:L', None, date)
