@@ -17,7 +17,7 @@ Datasources and outputs:
 - Excel file will be created next to `scraper.exe`
 - Excel file will be always called *HCSBD-FDA-data-import.xlsx*
 - If Excel's file *HCSBD-FDA-data-import.xlsx* already exists, worksheets *HCSBD* and *FDA* will be overwritten. Formulas, datatables and Pivot tables in other sheets inside this workbook will continue working after scraper execution so you can reuse the same Excel's workbook every time.
-- If *HCSBD-FDA-data-import.xlsx* file does not exists, workbook and worksheets *HCSBD* and *FDA* will be created from scratch.
+- If *HCSBD-FDA-data-import.xlsx* file does not exists, the script will create the file automatically.
 
 
 ## Guidelines
