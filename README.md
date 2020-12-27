@@ -13,7 +13,7 @@ Datasources and outputs:
 
 ## What you need to know
 
-- Expected execution time: between 3:30 minutes.
+- Expected execution time: around 3:30 minutes.
 - Excel file will be created next to `scraper.exe`
 - Excel file will be always called *HCSBD-FDA-data-import.xlsx*
 - If Excel's file *HCSBD-FDA-data-import.xlsx* already exists, worksheets *HCSBD* and *FDA* will be overwritten. Formulas, datatables and Pivot tables in other sheets inside this workbook will continue working after scraper execution so you can reuse the same Excel's workbook every time.
