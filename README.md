@@ -44,5 +44,7 @@ Datasources and outputs:
     - `pip install beautifulsoup4`
     - `pip install multiprocess`
     - `pip install DateTime`
+    - `pip install pdfminer`
+    - `pip install cProfile`
 5. Open cmd --> go to python directory --> execute command `python scraper.py`
 6. Once script execution ends, excel file *HCSBD-FDA-data-import.xlsx* is ready to use. Double check excel's last modification datetime.
