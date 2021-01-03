@@ -7,7 +7,7 @@ This python script pulls data from 2 different websites and creates/overwrites 2
 `scraper.exe` bundles the python scripts into one single stand-alone executable under Windows, Mac OS X and GNU/Linux.
 
 Datasources and outputs:
-- The *HC SBD* sheet contains the data extracted from the [Health Canada Summary Basis of Decision](https://hpr-rps.hres.ca/reg-content/summary-basis-decision-result.php?lang=en&term=) along with all product details for each record.
+- The *HC SBD* sheet contains the data extracted from the [Health Canada Summary Basis of Decision](https://hpr-rps.hres.ca/reg-content/summary-basis-decision-result.php?lang=en&term=) along with all milestones reached for each record.
 - The *FDA* sheet contains the new molecular entities extracted from the [FDA drug approvals](https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm?event=reportsSearch.process) along with the Approval Date(s) and History, Letters, Labels, Reviews for each record. The submission dates has been retrieved from PDFs called "Letter (PDF)".
 
 
