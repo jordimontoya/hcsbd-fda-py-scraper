@@ -40,10 +40,11 @@ Datasources and outputs:
 3. Download code source `cadth-pcpa-py-scraper`
 4. Open cmd and execute pip install to import below libraries:
     - `pip install xlsxwriter`
+    - `pip install requests`
     - `pip install xlwings`
     - `pip install beautifulsoup4`
     - `pip install multiprocess`
     - `pip install DateTime`
-    - `pip install pdfminer`
+    - `pip install pdfminer.six`
 5. Open cmd --> go to python directory --> execute command `python scraper.py`
 6. Once script execution ends, excel file *HCSBD-FDA-data-import.xlsx* is ready to use. Double check excel's last modification datetime.
