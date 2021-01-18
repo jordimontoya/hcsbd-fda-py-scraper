@@ -7,7 +7,7 @@ API_REST_FDA = "https://www.fda.gov/drugs/new-drugs-fda-cders-new-molecular-enti
 FDA_YEARS = ["2020","2019","2018","2017","2016","2015"]
 THEAD_PRODUCT_FDA_TABLE = ["Drug Name","Active Ingredient","Approval Date","FDA-approved use on approval date"]
 THEAD_PRODUCT_FDA_DETAIL = ["Action Date","Submission","Action Type","Submission Classification","Review Priority; Orphan Status","Letters, Reviews, Labels, Patient Package Insert", "Notes"]
-PDF_DATE_PATTERNS = ["dated and received on (.*) and","dated and received (.*) and","\) dated (.*) received","dated (.*) submitted","NDA received (.*) and","submitted and received (.*) and"]
+PDF_DATE_PATTERNS = ["new drug application NDA dated (.*) received","dated and received on (.*) and","dated and received (.*) and","\) dated (.*) received","dated (.*) submitted","NDA received (.*) and","submitted and received (.*) and"]
 
 def dateParser_fda(str):
     if str and "Unable to fetch data" not in str:

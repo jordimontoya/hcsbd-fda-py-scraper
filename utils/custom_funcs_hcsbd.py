@@ -200,6 +200,8 @@ def getMilestonesRow_HCSBD(array):
         if any("Request for priority status" in sublist["milestone"] for sublist in array):
             array = [sublist for sublist in array if "Request for priority status" not in sublist["milestone"]]
         product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
+    else:
+        product_row = product_row + ["" for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
     
     # Screening 1
     if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
