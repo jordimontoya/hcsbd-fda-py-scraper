@@ -89,9 +89,14 @@ def getProductDetail_fda(soup):
 
     return product_row
 
+def getTextFromTR(e):
+    if not e.text.strip() and e.attrs and e.attrs['headers'][0] == 'header2':
+        return e.findNext().text.strip()
+    return e.text.strip()
+
 # FDA - Returns excel row as a string
 def getExcelRow_fda(tr):
-    table_row = [e.text.strip() for e in tr.findChildren("td" , recursive=False)]
+    table_row = [getTextFromTR(e) for e in tr.findChildren("td" , recursive=False)]
     
     #remove first column
     if table_row:
@@ -106,7 +111,6 @@ def getExcelRow_fda(tr):
 
         soup = f.scrapBaseUrl(url_product)
         product_row = getProductDetail_fda(soup)
-
         product_row.append(getDateFromPDF(product_row))
 
     excel_row = table_row + product_row
