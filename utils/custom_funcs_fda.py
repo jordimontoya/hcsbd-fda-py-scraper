@@ -43,10 +43,7 @@ def getDateFromPDF(product_row):
                     date = datetime.strptime(res, '%B %d %Y')
                 except:
                     if f.re.match(r"([A-Za-z]+)([0-9]+)", res, f.re.I):
-                        res = res.replace(res, ' '.join(f.re.match(r"([a-z]+)([0-9]+)", res, f.re.I).groups()))
-                        res = res.split(" ")[:3]
-                        res = ' '.join(res)
-                        date = datetime.strptime(res, '%B %d %Y')
+                        date = res.replace(res, ' '.join(f.re.match(r"([a-z]+)([0-9]+)", res, f.re.I).groups()))
                     else:
                         date = "Unable to retrieve date from Letter PDF"
 
