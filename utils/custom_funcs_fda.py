@@ -7,7 +7,7 @@ API_REST_FDA = "https://www.fda.gov/drugs/new-drugs-fda-cders-new-molecular-enti
 FDA_YEARS = ["2020","2019","2018","2017","2016","2015"]
 THEAD_PRODUCT_FDA_TABLE = ["Drug Name","Active Ingredient","Approval Date","FDA-approved use on approval date"]
 THEAD_PRODUCT_FDA_DETAIL = ["Action Date","Submission","Action Type","Submission Classification","Review Priority; Orphan Status","Letters, Reviews, Labels, Patient Package Insert", "Notes"]
-PDF_DATE_PATTERNS = ["new drug application NDA dated (.*) received","dated and received on (.*) and","dated and received (.*) and","\) dated (.*) received","dated (.*) submitted","NDA received (.*) and","submitted and received (.*) and"]
+PDF_DATE_PATTERNS = ["BLA dated and received on (.*) and","BLA dated and received (.*) and","BLA dated (.*) received","BLA received (.*) and","NDA dated and received on (.*) and","NDA dated and received (.*) and","NDA received (.*) and","NDA dated (.*) received","NDAs dated (.*) received","NDAs dated and received (.*) and","dated and received on (.*) and","dated and received (.*) and","submitted and received (.*) and","new drug application NDA dated (.*) received"]
 
 def dateParser_fda(str):
     if str and "Unable to fetch data" not in str:
@@ -42,8 +42,11 @@ def getDateFromPDF(product_row):
                 try:
                     date = datetime.strptime(res, '%B %d %Y')
                 except:
-                    if f.re.match(r"([a-z]+)([0-9]+)", res, f.re.I):
-                        date = ' '.join(f.re.match(r"([a-z]+)([0-9]+)", res, f.re.I).groups())
+                    if f.re.match(r"([A-Za-z]+)([0-9]+)", res, f.re.I):
+                        res = res.replace(res, ' '.join(f.re.match(r"([a-z]+)([0-9]+)", res, f.re.I).groups()))
+                        res = res.split(" ")[:3]
+                        res = ' '.join(res)
+                        date = datetime.strptime(res, '%B %d %Y')
                     else:
                         date = "Unable to retrieve date from Letter PDF"
 
@@ -106,7 +109,7 @@ def getExcelRow_fda(tr):
     product_row = []
     
     if tr.find("a"):
-        url_product = tr.find("a")["href"].replace("httphttp", "http").strip()
+        url_product = tr.find("a")["href"].replace("httphttp", "http").strip().replace("http:", "https:")
         table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0]+'")'
 
         soup = f.scrapBaseUrl(url_product)

@@ -101,8 +101,8 @@ def run_scraper():
         trs = trs + soup.find("table", class_=cffda.TABLE_CLASS_FDA).find("tbody").findChildren("tr" , recursive=False)
     
     for index, tr in enumerate(trs):
-            if tr.find("th"):
-                del trs[index]
+        if tr.find("th"):
+            del trs[index]
 
     # FDA - Builds and writes data to excel
     f.excel_writer(cffda.getExcelRow_fda, worksheetFDA, trs, 1)

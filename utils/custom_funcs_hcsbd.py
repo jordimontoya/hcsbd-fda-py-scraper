@@ -1,13 +1,17 @@
 import utils.funcs as f
-from datetime import date
+import datetime
+import random
 
 OUTPUT_FILE = "HCSBD-FDA-data-import.xlsx"
 OUTPUT_FILE_TMP = "HCSBD-FDA-data-import-tmp.xlsx"
 
+BASE_URL_MEDICAL_1 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-medical-device-detailOne.php?lang=en&linkID="
+BASE_URL_MEDICAL_2 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-medical-device-detailTwo.php?lang=en&linkID="
+BASE_URL_MEDICAL_3 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-medical-device-detailThree.php?lang=en&linkID="
 BASE_URL_HCSBD_1 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailOne.php?lang=en&linkID="
 BASE_URL_HCSBD_2 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-detailTwo.php?lang=en&linkID="
-BASE_URL_HCSBD_3 = "https://hpr-rps.hres.ca/reg-content/summary-basis-decision-medical-device-detailOne.php?lang=en&linkID="
 API_REST_HCSBD_LIST = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?term=&pType=sbd&lang=en"
+API_REST_HCSBD_DETAIL_2 = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?linkID={}&pType=sbd&lang=en&_"
 API_REST_HCSBD_DETAIL = "https://health-products.canada.ca/api/dhpr/controller/dhprController.ashx?linkID={}&pType=sbd&lang=en"
 
 API_REST_KEYS_LIST = ["brand_name","med_ingredient","manufacturer"]
@@ -113,7 +117,7 @@ HCSBD_MILESTONE_AVOIDED_TITLES = ["Control Number","Original Submission","Refile
 
 def dateParser_HCSBD(str):
     if str and str != '':
-        return date.fromtimestamp(int(str))
+        return datetime.datetime.fromtimestamp(int(str)/1000)
     return ""
 
 def getMilestoneCompletedDate(element):
@@ -124,7 +128,7 @@ def getMilestoneCompletedDate(element):
         elif "+" in date:
             date = date.split("+")[0]
 
-        date = date.strip().replace('\n', '').replace('\r', '')[0:10]
+        date = date.strip().replace('\n', '').replace('\r', '')
 
         return dateParser_HCSBD(date)
     else:
@@ -193,57 +197,7 @@ def removeDuplicateMilestones(array):
 def getMilestonesRow_HCSBD(array):
     product_row = []
 
-    product_row = [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SUBMISSION]
     
-    if checkTitle("Request for priority status", array):
-        removeMilestoneTitle(array)
-        if any("Request for priority status" in sublist["milestone"] for sublist in array):
-            array = [sublist for sublist in array if "Request for priority status" not in sublist["milestone"]]
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
-    else:
-        product_row = product_row + ["" for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
-    
-    # Screening 1
-    if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
-        removeDuplicateMilestones(array)
-    if checkTitle("Screening", array) or checkTitle("Screnning", array):
-        removeMilestoneTitle(array)
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SCREENING]
-
-    # Review 1
-    if not checkTitle("Review", array):
-        removeDuplicateMilestones(array)
-    if checkTitle("Review", array):
-        removeMilestoneTitle(array)
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REVIEW]
-
-    # Screening 2
-    if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
-        removeDuplicateMilestones(array)
-    if checkTitle("Screening", array) or checkTitle("Screnning", array):
-        removeMilestoneTitle(array)
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SCREENING]
-
-    # Review 2
-    if not checkTitle("Review", array):
-        removeDuplicateMilestones(array)
-    if checkTitle("Review", array):
-        removeMilestoneTitle(array)
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REVIEW]
-
-    # Screening 3
-    if not checkTitle("Screening", array) and not checkTitle("Screnning", array):
-        removeDuplicateMilestones(array)
-    if checkTitle("Screening", array) or checkTitle("Screnning", array):
-        removeMilestoneTitle(array)
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_SCREENING]
-
-    # Review 3
-    if not checkTitle("Review", array):
-        removeDuplicateMilestones(array)
-    if checkTitle("Review", array):
-        removeMilestoneTitle(array)
-        product_row = product_row + [getProductMilestones(element, array) for element in HCSBD_MILESTONE_REVIEW]
 
     return product_row
 
@@ -251,14 +205,26 @@ def getMilestonesRow_HCSBD(array):
 def getExcelRow_HCSBD(item):
     table_row = [item[""+element] for element in API_REST_KEYS_LIST]
 
+    url_product = ''
+    #item['link_id'] = 'SBD00395'
+
     # product url
-    url_product = BASE_URL_HCSBD_1 + item['link_id']
+    if item['is_md']:
+        if item['template'] == 1:
+            url_product = BASE_URL_MEDICAL_1 + item['link_id']
+        elif item['template'] == 2:
+            url_product = BASE_URL_MEDICAL_2 + item['link_id']
+        else:
+            url_product = BASE_URL_MEDICAL_3 + item['link_id']
+    else:
+        if item['template'] == 1:
+            url_product = BASE_URL_HCSBD_1 + item['link_id']
+        else:
+            url_product = BASE_URL_HCSBD_2 + item['link_id']
 
-    if item['template'] == 2:
-        url_product = BASE_URL_HCSBD_2 + item['link_id']
-
-    if "N/A" in item['med_ingredient']:
-        url_product = BASE_URL_HCSBD_3 + item['link_id']
+    response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
+    if item['link_id'] != response['link_id']:
+        response = f.api_get(API_REST_HCSBD_DETAIL_2.format(item['link_id']) + "" + str(random.randint(100000,999999)))
 
     if "</sup>" in table_row[0]:
         table_row[0] = table_row[0].replace("<sup>"," ").split('</sup>')[0]
@@ -268,12 +234,61 @@ def getExcelRow_HCSBD(item):
 
     table_row[0] = '=HYPERLINK("'+url_product+'", "'+table_row[0].replace("<sup>","")+'")'
     table_row.append(item['link_id'])
-
-    response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
+   
     #print("Start: "+API_REST_HCSBD_DETAIL.format(item['link_id']))
     
     product_row = []
     if "milestone_list" in response and "N/A" not in item['med_ingredient']:
-        product_row = getMilestonesRow_HCSBD(response["milestone_list"])
+        product_row = [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_SUBMISSION]
+    
+        if checkTitle("Request for priority status", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            if any("Request for priority status" in sublist["milestone"] for sublist in response["milestone_list"]):
+                response["milestone_list"] = [sublist for sublist in response["milestone_list"] if "Request for priority status" not in sublist["milestone"]]
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
+        else:
+            product_row = product_row + ["" for element in HCSBD_MILESTONE_REQUEST_FOR_PRIORITY_STATUS]
+        
+        # Screening 1
+        if not checkTitle("Screening", response["milestone_list"]) and not checkTitle("Screnning", response["milestone_list"]):
+            removeDuplicateMilestones(response["milestone_list"])
+        if checkTitle("Screening", response["milestone_list"]) or checkTitle("Screnning", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_SCREENING]
+
+        # Review 1
+        if not checkTitle("Review", response["milestone_list"]):
+            removeDuplicateMilestones(response["milestone_list"])
+        if checkTitle("Review", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_REVIEW]
+
+        # Screening 2
+        if not checkTitle("Screening", response["milestone_list"]) and not checkTitle("Screnning", response["milestone_list"]):
+            removeDuplicateMilestones(response["milestone_list"])
+        if checkTitle("Screening", response["milestone_list"]) or checkTitle("Screnning", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_SCREENING]
+
+        # Review 2
+        if not checkTitle("Review", response["milestone_list"]):
+            removeDuplicateMilestones(response["milestone_list"])
+        if checkTitle("Review", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_REVIEW]
+
+        # Screening 3
+        if not checkTitle("Screening", response["milestone_list"]) and not checkTitle("Screnning", response["milestone_list"]):
+            removeDuplicateMilestones(response["milestone_list"])
+        if checkTitle("Screening", response["milestone_list"]) or checkTitle("Screnning", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_SCREENING]
+
+        # Review 3
+        if not checkTitle("Review", response["milestone_list"]):
+            removeDuplicateMilestones(response["milestone_list"])
+        if checkTitle("Review", response["milestone_list"]):
+            removeMilestoneTitle(response["milestone_list"])
+            product_row = product_row + [getProductMilestones(element, response["milestone_list"]) for element in HCSBD_MILESTONE_REVIEW]
 
     return table_row + product_row
