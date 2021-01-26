@@ -215,7 +215,8 @@ def getExcelRow_HCSBD(item):
             url_product = BASE_URL_HCSBD_2 + item['link_id']
 
     response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
-    if item['link_id'] != response['link_id']:
+
+    if len(response) and 'milestone_list' in response and item['link_id'] != response["milestone_list"][0]['link_id']:
         response = f.api_get(API_REST_HCSBD_DETAIL_2.format(item['link_id']) + "" + str(random.randint(100000,999999)))
 
     if "</sup>" in table_row[0]:
