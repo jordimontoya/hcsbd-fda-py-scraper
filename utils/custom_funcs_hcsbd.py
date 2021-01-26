@@ -193,14 +193,6 @@ def removeDuplicateMilestones(array):
     #    if not checkTitle("Screening", array) and not checkTitle("Review", array):
     #        print("wow")
 
-# HCSBD - Returns the detail row as a string
-def getMilestonesRow_HCSBD(array):
-    product_row = []
-
-    
-
-    return product_row
-
 # HCSBD - Returns excel row as a string
 def getExcelRow_HCSBD(item):
     table_row = [item[""+element] for element in API_REST_KEYS_LIST]
