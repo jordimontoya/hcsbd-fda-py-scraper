@@ -214,10 +214,15 @@ def getExcelRow_HCSBD(item):
         else:
             url_product = BASE_URL_HCSBD_2 + item['link_id']
 
-    response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
-
-    if len(response) and 'milestone_list' in response and item['link_id'] != response["milestone_list"][0]['link_id']:
-        response = f.api_get(API_REST_HCSBD_DETAIL_2.format(item['link_id']) + "" + str(random.randint(100000,999999)))
+    url = API_REST_HCSBD_DETAIL_2.format(item['link_id']) + str(random.randint(100000,999999))
+    response = f.api_get(API_REST_HCSBD_DETAIL_2.format(item['link_id']) + str(random.randint(100000,999999)))
+    if response and 'milestone_list' in response and response["milestone_list"]:
+        if item['link_id'] != response["milestone_list"][0]['link_id']:
+            response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
+            url = API_REST_HCSBD_DETAIL.format(item['link_id'])
+    elif not response or (response and "milestone_list" not in response and "N/A" not in item['med_ingredient']):
+        response = f.api_get(API_REST_HCSBD_DETAIL.format(item['link_id']))
+        url = API_REST_HCSBD_DETAIL.format(item['link_id'])
 
     if "</sup>" in table_row[0]:
         table_row[0] = table_row[0].replace("<sup>"," ").split('</sup>')[0]

@@ -73,10 +73,13 @@ def run_scraper():
     response = f.api_get(cfhcsbd.API_REST_HCSBD_LIST)["data"]
     
     # HCSBD - Builds and writes data to excel
-    f.excel_writer(cfhcsbd.getExcelRow_HCSBD, worksheetHCSBD, response, 2)
+    #f.excel_writer(cfhcsbd.getExcelRow_HCSBD, worksheetHCSBD, response, 2)
 
-    #for item in response:
-    #    cfhcsbd.getExcelRow_HCSBD(item)
+    currRow = 2
+    for item in response:
+        result = cfhcsbd.getExcelRow_HCSBD(item)
+        worksheetHCSBD.write_row(currRow, 0, result)
+        currRow += 1
 
     print('Scraping HCSBD... END')
     
